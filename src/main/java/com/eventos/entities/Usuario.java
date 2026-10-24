@@ -13,7 +13,7 @@ import jakarta.persistence.Table;
 import lombok.*;
 
 @Entity
-@Table(name = "usuario")
+@Table(name = "usuarios")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,7 +32,7 @@ public class Usuario {
     private String email;
 
     @Column(nullable = false, length = 100)
-    private String passwordHashString;
+    private String passwordHash;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
