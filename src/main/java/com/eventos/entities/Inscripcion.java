@@ -1,9 +1,6 @@
 package com.eventos.entities;
 
-import java.time.LocalDateTime;
-
 import com.eventos.enums.Estado;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -21,6 +18,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(
@@ -40,13 +39,13 @@ public class Inscripcion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "evento_id", nullable = false)
-    private Evento evento;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "evento_id", nullable = false)
+    private Evento evento;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -54,5 +53,4 @@ public class Inscripcion {
 
     @Column(nullable = false)
     private LocalDateTime fechaInscripcion;
-
 }
