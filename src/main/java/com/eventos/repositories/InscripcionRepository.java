@@ -1,4 +1,4 @@
-ackage com.eventos.repositories;
+package com.eventos.repositories;
 
 import com.eventos.entities.Inscripcion;
 import com.eventos.enums.Estado;
@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Optional;
@@ -17,7 +18,6 @@ import java.util.Optional;
 @Repository
 public interface InscripcionRepository extends JpaRepository<Inscripcion, Long> {
 
-    
     Optional<Inscripcion> findByUsuarioIdAndEventoId(Long usuarioId, Long eventoId);
 
     @EntityGraph(attributePaths = {"evento", "evento.ubicacion"})
@@ -48,7 +48,7 @@ public interface InscripcionRepository extends JpaRepository<Inscripcion, Long> 
     @EntityGraph(attributePaths = {"usuario"})
     Page<Inscripcion> findByEventoIdAndEstado(Long eventoId, Estado estado, Pageable pageable);
 
-        @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
         UPDATE Inscripcion i
         SET i.estado = :nuevoEstado
@@ -59,5 +59,4 @@ public interface InscripcionRepository extends JpaRepository<Inscripcion, Long> 
             @Param("estadoActual") Estado estadoActual,
             @Param("nuevoEstado") Estado nuevoEstado
     );
-}
 }
