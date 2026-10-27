@@ -12,6 +12,8 @@ services:
       SPRING_DATASOURCE_USERNAME: eventos
       SPRING_DATASOURCE_PASSWORD: eventos
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
     depends_on:
       postgres:
         condition: service_healthy
