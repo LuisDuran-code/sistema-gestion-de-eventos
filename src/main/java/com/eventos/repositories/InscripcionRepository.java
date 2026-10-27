@@ -1,4 +1,4 @@
-package com.eventos.repositories;
+ackage com.eventos.repositories;
 
 import com.eventos.entities.Inscripcion;
 import com.eventos.enums.Estado;
@@ -48,7 +48,7 @@ public interface InscripcionRepository extends JpaRepository<Inscripcion, Long> 
     @EntityGraph(attributePaths = {"usuario"})
     Page<Inscripcion> findByEventoIdAndEstado(Long eventoId, Estado estado, Pageable pageable);
 
-    @Modifying(flushAutomatically = true, clearAutomatically = true)
+        @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
         UPDATE Inscripcion i
         SET i.estado = :nuevoEstado
@@ -59,4 +59,5 @@ public interface InscripcionRepository extends JpaRepository<Inscripcion, Long> 
             @Param("estadoActual") Estado estadoActual,
             @Param("nuevoEstado") Estado nuevoEstado
     );
+}
 }
