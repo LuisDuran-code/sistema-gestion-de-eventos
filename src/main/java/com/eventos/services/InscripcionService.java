@@ -59,9 +59,10 @@ public class InscripcionService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El evento ya comenzó");
         }
 
-        var inscripcionExistente = inscripcionRepository.findByUsuarioIdAndEventoId(usuario.getId(), evento.getId());
-       
-if (inscripcionExistente.isPresent() && inscripcionExistente.get().getEstado() == Estado.CONFIRMADA) {
+             var inscripcionExistente = inscripcionRepository.findByUsuarioIdAndEventoId(usuario.getId(), evento.getId());
+        if (inscripcionExistente.isPresent() && inscripcionExistente.get().getEstado() == Estado.CONFIRMADA) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya estás inscrito en este evento");
+        }
 
         boolean haySolape = inscripcionRepository.existeSolapeParaUsuario(
                 usuario.getId(), evento.getFecha(), evento.getHoraInicio(), evento.getHoraFin());
@@ -69,14 +70,15 @@ if (inscripcionExistente.isPresent() && inscripcionExistente.get().getEstado() =
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Tienes otra inscripción activa en este horario");
         }
 
-        
-long inscritosActivos = inscripcionRepository.countByEventoIdAndEstado(evento.getId(), Estado.CONFIRMADA);
-if (inscritosActivos >= evento.getLimiteAsistentes()) {
+        long inscritosActivos = inscripcionRepository.countByEventoIdAndEstado(evento.getId(), Estado.CONFIRMADA);
+        if (inscritosActivos >= evento.getLimiteAsistentes()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El evento está lleno");
+        }
 
         Inscripcion inscripcion = inscripcionExistente.orElseGet(Inscripcion::new);
         inscripcion.setUsuario(usuario);
         inscripcion.setEvento(evento);
-inscripcion.setEstado(Estado.CONFIRMADA);
+        inscripcion.setEstado(Estado.CONFIRMADA);
         inscripcion.setFechaInscripcion(LocalDateTime.now());
 
         return inscripcionMapper.toResponse(inscripcionRepository.save(inscripcion));
@@ -114,3 +116,4 @@ inscripcion.setEstado(Estado.CONFIRMADA);
         return pagina.map(inscripcionMapper::toResponse);
     }
 }
+    
