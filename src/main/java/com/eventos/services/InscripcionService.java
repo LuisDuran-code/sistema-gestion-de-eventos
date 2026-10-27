@@ -50,9 +50,9 @@ public class InscripcionService {
         Evento evento = eventoRepository.findByIdForUpdate(request.eventoId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El evento no existe"));
 
-        if (evento.getEstado() != Estado.PROGRAMADO) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "El evento no está disponible");
-        }
+        if (!evento.isActivo()) {
+    throw new ResponseStatusException(HttpStatus.CONFLICT, "El evento no está disponible");
+}
 
         LocalDateTime inicioEvento = LocalDateTime.of(evento.getFecha(), evento.getHoraInicio());
         if (inicioEvento.isBefore(LocalDateTime.now())) {
@@ -60,9 +60,8 @@ public class InscripcionService {
         }
 
         var inscripcionExistente = inscripcionRepository.findByUsuarioIdAndEventoId(usuario.getId(), evento.getId());
-        if (inscripcionExistente.isPresent() && inscripcionExistente.get().getEstado() == Estado.ACTIVA) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya estás inscrito en este evento");
-        }
+       
+if (inscripcionExistente.isPresent() && inscripcionExistente.get().getEstado() == Estado.CONFIRMADA) {
 
         boolean haySolape = inscripcionRepository.existeSolapeParaUsuario(
                 usuario.getId(), evento.getFecha(), evento.getHoraInicio(), evento.getHoraFin());
@@ -70,15 +69,14 @@ public class InscripcionService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Tienes otra inscripción activa en este horario");
         }
 
-        long inscritosActivos = inscripcionRepository.countByEventoIdAndEstado(evento.getId(), Estado.ACTIVA);
-        if (inscritosActivos >= evento.getCupo()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "El evento está lleno");
-        }
+        
+long inscritosActivos = inscripcionRepository.countByEventoIdAndEstado(evento.getId(), Estado.CONFIRMADA);
+if (inscritosActivos >= evento.getLimiteAsistentes()) {
 
         Inscripcion inscripcion = inscripcionExistente.orElseGet(Inscripcion::new);
         inscripcion.setUsuario(usuario);
         inscripcion.setEvento(evento);
-        inscripcion.setEstado(Estado.ACTIVA);
+inscripcion.setEstado(Estado.CONFIRMADA);
         inscripcion.setFechaInscripcion(LocalDateTime.now());
 
         return inscripcionMapper.toResponse(inscripcionRepository.save(inscripcion));
