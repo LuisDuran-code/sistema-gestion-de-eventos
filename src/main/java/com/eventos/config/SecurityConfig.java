@@ -2,6 +2,7 @@ package com.eventos.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -45,9 +46,11 @@ public class SecurityConfig {
                         .csrfTokenRequestHandler(csrfHandler)
                         .ignoringRequestMatchers("/api/auth/login", "/api/auth/registro"))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/registro", "/api/auth/login").permitAll()
-                        .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
                         .requestMatchers("/api/auth/registro", "/api/auth/login", "/error").permitAll()
+                        .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/eventos/*/inscritos").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/eventos/**", "/api/ubicaciones/**").authenticated()
+                        .requestMatchers("/api/eventos/**", "/api/ubicaciones/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
@@ -57,4 +60,6 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID"))
                 .build();
     }
+
+
 }
