@@ -2,6 +2,7 @@ package com.eventos.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 public record EventoResponseDto(
         Long id,
@@ -14,5 +15,6 @@ public record EventoResponseDto(
         long inscritos,
         long cuposDisponibles,
         String estado,
-        UbicacionResumenDto ubicacion
+        UbicacionResumenDto ubicacion,
+        List<String> imagenes
 ) {}

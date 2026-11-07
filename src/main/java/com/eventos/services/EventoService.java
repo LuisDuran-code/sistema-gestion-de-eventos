@@ -19,6 +19,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class EventoService {
@@ -27,16 +29,19 @@ public class EventoService {
     private final UbicacionRepository ubicacionRepository;
     private final InscripcionRepository inscripcionRepository;
     private final EventoMapper eventoMapper;
+    private final ValidadorImagenes validadorImagenes;
 
     public EventoService(
             EventoRepository eventoRepository,
             UbicacionRepository ubicacionRepository,
             InscripcionRepository inscripcionRepository,
-            EventoMapper eventoMapper) {
+            EventoMapper eventoMapper,
+            ValidadorImagenes validadorImagenes) {
         this.eventoRepository = eventoRepository;
         this.ubicacionRepository = ubicacionRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.eventoMapper = eventoMapper;
+        this.validadorImagenes = validadorImagenes;
     }
 
     @Transactional(readOnly = true)
@@ -78,6 +83,7 @@ public class EventoService {
     @Transactional
     public EventoResponseDto crear(EventoRequestDto dto) {
         validarFechaYHoras(dto.fecha(), dto.horaInicio(), dto.horaFin());
+        List<String> imagenes = imagenesValidas(dto);
 
         Ubicacion ubicacion = obtenerYValidarUbicacion(dto.ubicacionId(), dto.cupo());
 
@@ -99,6 +105,7 @@ public class EventoService {
                 .limiteAsistentes(dto.cupo())
                 .ubicacion(ubicacion)
                 .activo(true)
+                .imagenes(imagenes)
                 .build();
 
         Evento guardado = eventoRepository.save(evento);
@@ -117,6 +124,7 @@ public class EventoService {
         }
 
         validarFechaYHoras(dto.fecha(), dto.horaInicio(), dto.horaFin());
+        List<String> imagenes = imagenesValidas(dto);
 
         long inscritosActivos = inscripcionRepository.countByEventoIdAndEstado(
                 evento.getId(), Estado.CONFIRMADA
@@ -159,6 +167,8 @@ public class EventoService {
         evento.setHoraFin(dto.horaFin());
         evento.setLimiteAsistentes(dto.cupo());
         evento.setUbicacion(ubicacion);
+        evento.getImagenes().clear();
+        evento.getImagenes().addAll(imagenes);
 
         Evento actualizado = eventoRepository.save(evento);
         return eventoMapper.aResponse(actualizado, inscritosActivos);
@@ -190,6 +200,12 @@ public class EventoService {
         return inscripcionRepository
                 .findByEventoIdAndEstado(id, Estado.CONFIRMADA, pageable)
                 .map(eventoMapper::aInscritoDto);
+    }
+
+    private List<String> imagenesValidas(EventoRequestDto dto) {
+        List<String> imagenes = dto.imagenes() == null ? new ArrayList<>() : new ArrayList<>(dto.imagenes());
+        validadorImagenes.validar(imagenes);
+        return imagenes;
     }
 
     private void validarFechaYHoras(LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {

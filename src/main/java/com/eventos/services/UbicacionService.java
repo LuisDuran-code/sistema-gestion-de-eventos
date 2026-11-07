@@ -7,7 +7,6 @@ import com.eventos.mapper.UbicacionMapper;
 import com.eventos.repositories.EventoRepository;
 import com.eventos.repositories.UbicacionRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,10 +28,8 @@ public class UbicacionService {
     private final UbicacionRepository ubicacionRepository;
     private final EventoRepository eventoRepository;
     private final UbicacionMapper mapper;
+    private final ValidadorImagenes validadorImagenes;
     private static final ZoneId ZONA = ZoneId.of("America/El_Salvador");
-
-    @Value("${app.imagenes.prefijo-permitido:}")
-    private String prefijoPermitido;
 
     @Transactional(readOnly = true)
     public Page<UbicacionResponseDto> listar(String nombre, Pageable pageable,
@@ -123,17 +120,11 @@ public class UbicacionService {
     }
 
     private void validarUrls(UbicacionRequestDto req) {
-        if (prefijoPermitido.isBlank()) {
-            return;
-        }
         List<String> todas = copiar(req.imagenes());
         if (req.imagenPrincipal() != null) {
             todas.add(req.imagenPrincipal());
         }
-        if (todas.stream().anyMatch(url -> !url.startsWith(prefijoPermitido))) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Las imágenes deben estar en " + prefijoPermitido);
-        }
+        validadorImagenes.validar(todas);
     }
 
     private ResponseStatusException noEncontrada() {
