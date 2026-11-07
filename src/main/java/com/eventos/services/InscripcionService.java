@@ -1,13 +1,13 @@
 package com.eventos.services;
 
-import com.eventos.dtos.InscripcionRequestDto;
-import com.eventos.dtos.InscripcionResponseDto;
+import com.eventos.dto.InscripcionRequestDto;
+import com.eventos.dto.InscripcionResponseDto;
 import com.eventos.entities.Evento;
 import com.eventos.entities.Inscripcion;
 import com.eventos.entities.Usuario;
 import com.eventos.enums.Estado;
 import com.eventos.enums.Rol;
-import com.eventos.mappers.InscripcionMapper;
+import com.eventos.mapper.InscripcionMapper;
 import com.eventos.repositories.EventoRepository;
 import com.eventos.repositories.InscripcionRepository;
 import com.eventos.repositories.UsuarioRepository;
@@ -43,11 +43,37 @@ public class InscripcionService {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
+        return registrar(usuario, request.eventoId(),
+                "Ya estás inscrito en este evento",
+                "Tienes otra inscripción activa en este horario");
+    }
+
+    @Transactional
+    public InscripcionResponseDto agregarAsistente(Long eventoId, Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+
+        return registrar(usuario, eventoId,
+                "El usuario ya está inscrito en este evento",
+                "El usuario tiene otra inscripción activa en este horario");
+    }
+
+    @Transactional
+    public void quitarAsistente(Long eventoId, Long usuarioId) {
+        Inscripcion inscripcion = inscripcionRepository.findByUsuarioIdAndEventoId(usuarioId, eventoId)
+                .filter(i -> i.getEstado() == Estado.CONFIRMADA)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Inscripción no encontrada"));
+
+        inscripcion.setEstado(Estado.CANCELADA);
+        inscripcionRepository.save(inscripcion);
+    }
+
+    private InscripcionResponseDto registrar(Usuario usuario, Long eventoId, String mensajeDuplicado, String mensajeSolape) {
         if (usuario.getRol() == Rol.ADMIN) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Los administradores no pueden inscribirse");
         }
 
-        Evento evento = eventoRepository.findByIdForUpdate(request.eventoId())
+        Evento evento = eventoRepository.findByIdForUpdate(eventoId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El evento no existe"));
 
         if (!evento.isActivo()) {
@@ -61,13 +87,13 @@ public class InscripcionService {
 
              var inscripcionExistente = inscripcionRepository.findByUsuarioIdAndEventoId(usuario.getId(), evento.getId());
         if (inscripcionExistente.isPresent() && inscripcionExistente.get().getEstado() == Estado.CONFIRMADA) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya estás inscrito en este evento");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, mensajeDuplicado);
         }
 
         boolean haySolape = inscripcionRepository.existeSolapeParaUsuario(
                 usuario.getId(), evento.getFecha(), evento.getHoraInicio(), evento.getHoraFin());
         if (haySolape) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Tienes otra inscripción activa en este horario");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, mensajeSolape);
         }
 
         long inscritosActivos = inscripcionRepository.countByEventoIdAndEstado(evento.getId(), Estado.CONFIRMADA);

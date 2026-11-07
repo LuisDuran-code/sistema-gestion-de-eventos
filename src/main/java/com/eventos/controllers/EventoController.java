@@ -2,8 +2,11 @@ package com.eventos.controllers;
 
 import com.eventos.dto.EventoRequestDto;
 import com.eventos.dto.EventoResponseDto;
+import com.eventos.dto.InscripcionResponseDto;
 import com.eventos.dto.InscritoDto;
+import com.eventos.dto.InscritoRequestDto;
 import com.eventos.services.EventoService;
+import com.eventos.services.InscripcionService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,9 +24,11 @@ import java.time.LocalDate;
 public class EventoController {
 
     private final EventoService eventoService;
+    private final InscripcionService inscripcionService;
 
-    public EventoController(EventoService eventoService) {
+    public EventoController(EventoService eventoService, InscripcionService inscripcionService) {
         this.eventoService = eventoService;
+        this.inscripcionService = inscripcionService;
     }
 
     @GetMapping
@@ -73,6 +78,24 @@ public class EventoController {
             @PageableDefault(size = 10) Pageable pageable) {
 
         return ResponseEntity.ok(eventoService.listarInscritos(id, pageable));
+    }
+
+    @PostMapping("/{id}/inscritos")
+    public ResponseEntity<InscripcionResponseDto> agregarInscrito(
+            @PathVariable Long id,
+            @Valid @RequestBody InscritoRequestDto dto) {
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(inscripcionService.agregarAsistente(id, dto.usuarioId()));
+    }
+
+    @DeleteMapping("/{id}/inscritos/{usuarioId}")
+    public ResponseEntity<Void> quitarInscrito(
+            @PathVariable Long id,
+            @PathVariable Long usuarioId) {
+
+        inscripcionService.quitarAsistente(id, usuarioId);
+        return ResponseEntity.noContent().build();
     }
 
     private boolean esAdmin(Authentication auth) {

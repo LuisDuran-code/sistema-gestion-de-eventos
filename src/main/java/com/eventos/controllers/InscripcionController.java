@@ -1,7 +1,7 @@
 package com.eventos.controllers;
 
-import com.eventos.dtos.InscripcionRequestDto;
-import com.eventos.dtos.InscripcionResponseDto;
+import com.eventos.dto.InscripcionRequestDto;
+import com.eventos.dto.InscripcionResponseDto;
 import com.eventos.enums.Estado;
 import com.eventos.services.InscripcionService;
 import jakarta.validation.Valid;

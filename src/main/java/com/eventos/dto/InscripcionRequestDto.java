@@ -1,4 +1,4 @@
-package com.eventos.dtos;
+package com.eventos.dto;
 
 import jakarta.validation.constraints.NotNull;
 
