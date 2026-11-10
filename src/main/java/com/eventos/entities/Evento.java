@@ -2,9 +2,12 @@ package com.eventos.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "eventos")
@@ -43,4 +46,12 @@ public class Evento {
 
     @Column(nullable = false)
     private boolean activo;
+
+    @ElementCollection
+    @CollectionTable(name = "evento_imagenes", joinColumns = @JoinColumn(name = "evento_id"))
+    @OrderColumn(name = "posicion")
+    @Column(name = "url", length = 500)
+    @BatchSize(size = 20)
+    @Builder.Default
+    private List<String> imagenes = new ArrayList<>();
 }

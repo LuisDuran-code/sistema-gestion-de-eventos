@@ -12,6 +12,8 @@ target/
 *.iws
 *.iml
 *.ipr
+*.env
+
 
 ### Eclipse ###
 .apt_generated
@@ -37,3 +39,4 @@ build/
 
 ### Mac OS ###
 .DS_Store.idea/
+.env

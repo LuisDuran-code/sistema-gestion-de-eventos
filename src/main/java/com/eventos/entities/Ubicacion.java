@@ -2,6 +2,7 @@ package com.eventos.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,7 @@ public class Ubicacion {
     @ElementCollection
     @CollectionTable(name = "ubicacion_imagenes", joinColumns = @JoinColumn(name = "ubicacion_id"))
     @Column(name = "url", length = 500)
+    @BatchSize(size = 20)
     @Builder.Default
     private List<String> imagenes = new ArrayList<>();
 
