@@ -9,6 +9,8 @@ import com.eventos.entities.Inscripcion;
 import com.eventos.entities.Ubicacion;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+
 @Component
 public class EventoMapper {
 
@@ -35,7 +37,8 @@ public class EventoMapper {
                 inscritosActivos,
                 disponibles,
                 estadoTexto,
-                ubicacionResumen
+                ubicacionResumen,
+                new ArrayList<>(evento.getImagenes())
         );
     }
 

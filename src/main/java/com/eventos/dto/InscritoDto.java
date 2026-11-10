@@ -1,10 +1,10 @@
 package com.eventos.dto;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 public record InscritoDto(
         Long usuarioId,
         String nombre,
         String email,
-        LocalTime fechaInscripcion
+        LocalDateTime fechaInscripcion
 ) {}

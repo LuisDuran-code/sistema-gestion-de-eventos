@@ -47,7 +47,7 @@ public class SecurityConfig {
                         .ignoringRequestMatchers("/api/auth/login", "/api/auth/registro"))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/registro", "/api/auth/login", "/error").permitAll()
-                        .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
+                        .requestMatchers("/api/usuarios/**", "/api/imagenes/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/eventos/*/inscritos").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/eventos/**", "/api/ubicaciones/**").authenticated()
                         .requestMatchers("/api/eventos/**", "/api/ubicaciones/**").hasRole("ADMIN")

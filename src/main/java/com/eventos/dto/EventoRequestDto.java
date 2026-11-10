@@ -4,8 +4,10 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 public record EventoRequestDto(
         @NotBlank(message = "no debe estar vacío")
@@ -29,5 +31,8 @@ public record EventoRequestDto(
         Integer cupo,
 
         @NotNull(message = "no debe ser nulo")
-        Long ubicacionId
+        Long ubicacionId,
+
+        @Size(max = 10, message = "no debe superar las 10 imágenes")
+        List<@NotBlank @Size(max = 500) @Pattern(regexp = "^https://\\S+$", message = "Debe ser una URL https") String> imagenes
 ) {}
